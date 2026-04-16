@@ -19,10 +19,22 @@ const base = import.meta.env.BASE_URL;
         thorough testing, and shipping work that holds up in production.
       </p>
       <div class="hero-actions">
-        <a href={`${base}#projects`} class="btn btn-primary">View Projects</a>
-        <a href={`${base}resume.pdf`} class="btn btn-outline" target="_blank" rel="noopener">
-          Resume
-        </a>
+        <a href={`${base}#projects`} class="btn btn-primary">Projects</a>
+        <div class="resume-mascot-wrap" id="resume-mascot-wrap">
+          <div class="mascot" aria-hidden="true">
+            <span class="mascot-arm mascot-arm-left"></span>
+            <span class="mascot-arm mascot-arm-right"></span>
+            <span class="mascot-leg mascot-leg-left"></span>
+            <span class="mascot-leg mascot-leg-right"></span>
+            <div class="mascot-body">
+              <span class="mascot-eye mascot-eye-left"></span>
+              <span class="mascot-eye mascot-eye-right"></span>
+            </div>
+          </div>
+          <a href={`${base}resume.pdf`} class="btn btn-outline resume-btn" target="_blank" rel="noopener">
+            Resume
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -114,6 +126,37 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
   </section>
+  <script>
+    const wrap = document.getElementById("resume-mascot-wrap");
+    if (wrap) {
+      const NEAR_ZONE_PX = 60;
+      let ticking = false;
+      let pointerX = 0;
+      let pointerY = 0;
+
+      const update = () => {
+        const rect = wrap.getBoundingClientRect();
+        const dx = Math.max(rect.left - pointerX, 0, pointerX - rect.right);
+        const dy = Math.max(rect.top - pointerY, 0, pointerY - rect.bottom);
+        const distance = Math.hypot(dx, dy);
+        wrap.classList.toggle("is-happy", distance <= NEAR_ZONE_PX);
+        ticking = false;
+      };
+
+      window.addEventListener("mousemove", (e) => {
+        pointerX = e.clientX;
+        pointerY = e.clientY;
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      }, { passive: true });
+
+      window.addEventListener("mouseleave", () => {
+        wrap.classList.remove("is-happy");
+      });
+    }
+  </script>
 </BaseLayout>
 
 <style>
@@ -184,6 +227,118 @@ const base = import.meta.env.BASE_URL;
 
   .btn-outline:hover {
     background: rgba(56, 189, 248, 0.1);
+  }
+
+  .resume-mascot-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .mascot {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    width: 28px;
+    height: 34px;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .mascot-body {
+    position: absolute;
+    inset: 4px 4px 6px 4px;
+    background: var(--color-accent);
+    border-radius: 50% / 55%;
+    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.35);
+    z-index: 2;
+  }
+
+  .mascot-eye {
+    position: absolute;
+    top: 45%;
+    width: 3px;
+    height: 3px;
+    background: var(--color-bg);
+    border-radius: 50%;
+    transition: height 0.2s ease, border-radius 0.2s ease, top 0.2s ease;
+  }
+
+  .mascot-eye-left {
+    left: 28%;
+  }
+
+  .mascot-eye-right {
+    right: 28%;
+  }
+
+  .mascot-arm,
+  .mascot-leg {
+    position: absolute;
+    background: var(--color-accent);
+    border-radius: 4px;
+    z-index: 1;
+  }
+
+  .mascot-arm {
+    top: 44%;
+    width: 3px;
+    height: 8px;
+    transform-origin: top center;
+  }
+
+  .mascot-arm-left {
+    left: 2px;
+    transform: rotate(20deg);
+  }
+
+  .mascot-arm-right {
+    right: 2px;
+    transform: rotate(-20deg);
+  }
+
+  .mascot-leg {
+    bottom: 0;
+    width: 3px;
+    height: 7px;
+    transform-origin: top center;
+  }
+
+  .mascot-leg-left {
+    left: 9px;
+  }
+
+  .mascot-leg-right {
+    right: 9px;
+  }
+
+  .resume-mascot-wrap.is-happy .mascot-arm-right {
+    animation: mascot-arm-wave 0.6s ease-in-out infinite;
+  }
+
+  .resume-mascot-wrap.is-happy .mascot-leg-left {
+    transform: translateY(-3px) rotate(20deg);
+  }
+
+  .resume-mascot-wrap.is-happy .mascot-eye {
+    height: 1.5px;
+    border-radius: 2px;
+    top: 48%;
+  }
+
+  @keyframes mascot-arm-wave {
+    0%, 100% {
+      transform: rotate(-140deg);
+    }
+    50% {
+      transform: rotate(-165deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .resume-mascot-wrap.is-happy .mascot-arm-right {
+      animation: none;
+    }
   }
 
   .projects-grid {

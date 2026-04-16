@@ -6,101 +6,315 @@ interface Props {
   impact: string;
   repo?: string;
   demo?: string;
+  link?: string;
 }
 
-const { title, description, stack, impact, repo, demo } = Astro.props;
+const { title, description, stack, impact, repo, demo, link } = Astro.props;
+
+const primaryLink = link ?? demo ?? repo;
 ---
 
-<article class="project-card">
-  <div class="project-header">
-    <h3 class="project-title">{title}</h3>
-    <div class="project-links">
-      {repo && (
-        <a href={repo} target="_blank" rel="noopener" aria-label={`${title} source code`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-          </svg>
-        </a>
-      )}
-      {demo && (
-        <a href={demo} target="_blank" rel="noopener" aria-label={`${title} live demo`}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
-        </a>
-      )}
+<article class="project-card" data-flipped="false">
+  <div class="project-card-inner">
+    <button
+      type="button"
+      class="project-card-face project-card-front"
+      data-flip-open
+      aria-label={`${title} — view details`}
+    >
+      <span class="project-card-title">{title}</span>
+      <span class="project-card-hint">Click to flip</span>
+    </button>
+
+    <div class="project-card-face project-card-back" aria-hidden="true">
+      <button
+        type="button"
+        class="project-card-back-close"
+        data-flip-close
+        aria-label="Back to card front"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
+      <h3 class="project-card-back-title">{title}</h3>
+
+      <div class="project-card-back-scroll">
+        <div class="project-card-section">
+          <span class="project-card-label">Description</span>
+          {description ? (
+            <p class="project-card-text">{description}</p>
+          ) : (
+            <p class="project-card-placeholder">Short description coming soon.</p>
+          )}
+        </div>
+
+        <div class="project-card-section">
+          <span class="project-card-label">Impact</span>
+          {impact ? (
+            <p class="project-card-text project-card-impact">{impact}</p>
+          ) : (
+            <p class="project-card-placeholder">Impact details coming soon.</p>
+          )}
+        </div>
+
+        {stack.length > 0 && (
+          <div class="project-card-section">
+            <span class="project-card-label">Stack</span>
+            <div class="project-card-stack">
+              {stack.map((tech) => (
+                <span class="tag">{tech}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="project-card-section">
+          <span class="project-card-label">Link</span>
+          {primaryLink ? (
+            <a
+              href={primaryLink}
+              target="_blank"
+              rel="noopener"
+              class="project-card-link"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              Visit
+            </a>
+          ) : (
+            <p class="project-card-placeholder">Link coming soon.</p>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
-
-  <p class="project-description">{description}</p>
-  <p class="project-impact">{impact}</p>
-
-  <div class="project-stack">
-    {stack.map((tech) => (
-      <span class="tag">{tech}</span>
-    ))}
   </div>
 </article>
 
 <style>
   .project-card {
-    background: var(--color-bg-card);
+    perspective: 1200px;
+  }
+
+  .project-card-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .project-card[data-flipped="true"] .project-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .project-card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 1.5rem;
-    transition: border-color 0.2s, transform 0.2s;
+    background: var(--color-bg-card);
+    color: var(--color-text);
+    overflow: hidden;
   }
 
-  .project-card:hover {
+  .project-card-front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+
+  .project-card[data-flipped="true"] .project-card-front {
+    pointer-events: none;
+  }
+
+  .project-card-front:hover,
+  .project-card-front:focus-visible {
     border-color: var(--color-accent);
-    transform: translateY(-2px);
-  }
-
-  .project-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.75rem;
-  }
-
-  .project-title {
-    font-size: 1.15rem;
-    font-weight: 600;
-  }
-
-  .project-links {
-    display: flex;
-    gap: 0.75rem;
-  }
-
-  .project-links a {
-    color: var(--color-text-muted);
-    transition: color 0.2s;
-  }
-
-  .project-links a:hover {
     color: var(--color-accent);
+    outline: none;
   }
 
-  .project-description {
+  .project-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .project-card-hint {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--color-text-muted);
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
+    opacity: 0;
+    transition: opacity 0.2s;
   }
 
-  .project-impact {
-    font-size: 0.85rem;
+  .project-card-front:hover .project-card-hint,
+  .project-card-front:focus-visible .project-card-hint {
+    opacity: 1;
+  }
+
+  .project-card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+
+  .project-card[data-flipped="true"] .project-card-back {
+    pointer-events: auto;
+  }
+
+  .project-card-back[aria-hidden="true"] {
+    pointer-events: none;
+  }
+
+  .project-card-back-close {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .project-card-back-close:hover,
+  .project-card-back-close:focus-visible {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    outline: none;
+  }
+
+  .project-card-back-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 2.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .project-card-back-scroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-right: 0.25rem;
+  }
+
+  .project-card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .project-card-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .project-card-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text);
+  }
+
+  .project-card-impact {
     color: var(--color-accent);
     font-weight: 500;
-    margin-bottom: 1rem;
   }
 
-  .project-stack {
+  .project-card-placeholder {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .project-card-stack {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .project-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+    align-self: flex-start;
+  }
+
+  .project-card-link:hover {
+    border-bottom-color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-card-inner {
+      transition: none;
+    }
+
+    .project-card-hint {
+      transition: none;
+    }
   }
 </style>
+
+<script>
+  const openButtons = document.querySelectorAll<HTMLButtonElement>(
+    "[data-flip-open]"
+  );
+
+  const setFlipped = (card: HTMLElement, flipped: boolean) => {
+    card.setAttribute("data-flipped", flipped ? "true" : "false");
+    const back = card.querySelector<HTMLElement>(".project-card-back");
+    const front = card.querySelector<HTMLElement>(".project-card-front");
+    if (back) back.setAttribute("aria-hidden", flipped ? "false" : "true");
+    if (front) front.setAttribute("aria-hidden", flipped ? "true" : "false");
+  };
+
+  openButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest<HTMLElement>(".project-card");
+      if (card) setFlipped(card, true);
+    });
+  });
+
+  const closeButtons = document.querySelectorAll<HTMLButtonElement>(
+    "[data-flip-close]"
+  );
+
+  closeButtons.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const card = btn.closest<HTMLElement>(".project-card");
+      if (card) setFlipped(card, false);
+    });
+  });
+</script>

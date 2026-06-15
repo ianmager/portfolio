@@ -4,13 +4,16 @@ interface Props {
   description: string;
   stack: string[];
   impact: string;
+  image?: string;
   repo?: string;
   demo?: string;
   link?: string;
 }
 
-const { title, description, stack, impact, repo, demo, link } = Astro.props;
+const { title, description, stack, impact, image, repo, demo, link } = Astro.props;
 
+const base = import.meta.env.BASE_URL;
+const imageSrc = image ? `${base}${image}` : undefined;
 const primaryLink = link ?? demo ?? repo;
 ---
 
@@ -18,26 +21,34 @@ const primaryLink = link ?? demo ?? repo;
   <div class="project-card-inner">
     <button
       type="button"
-      class="project-card-face project-card-front"
+      class:list={["project-card-face", "project-card-front", { "project-card-front--has-image": imageSrc }]}
       data-flip-open
       aria-label={`${title} — view details`}
     >
-      <span class="project-card-title">{title}</span>
-      <span class="project-card-hint">Click to flip</span>
+      {imageSrc ? (
+        <>
+          <img src={imageSrc} alt="" class="project-card-thumb" loading="lazy" />
+          <span class="project-card-front-overlay">
+            <span class="project-card-title">{title}</span>
+            <span class="project-card-hint">Click to flip</span>
+          </span>
+        </>
+      ) : (
+        <>
+          <span class="project-card-title">{title}</span>
+          <span class="project-card-hint">Click to flip</span>
+        </>
+      )}
     </button>
 
-    <div class="project-card-face project-card-back" aria-hidden="true">
-      <button
-        type="button"
-        class="project-card-back-close"
-        data-flip-close
-        aria-label="Back to card front"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-
+    <div
+      class="project-card-face project-card-back"
+      data-flip-close
+      aria-hidden="true"
+      role="button"
+      tabindex="-1"
+      aria-label={`${title} — back to preview`}
+    >
       <h3 class="project-card-back-title">{title}</h3>
 
       <div class="project-card-back-scroll">
@@ -78,6 +89,7 @@ const primaryLink = link ?? demo ?? repo;
               target="_blank"
               rel="noopener"
               class="project-card-link"
+              data-no-flip
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -122,6 +134,7 @@ const primaryLink = link ?? demo ?? repo;
     background: var(--color-bg-card);
     color: var(--color-text);
     overflow: hidden;
+    transform-style: preserve-3d;
   }
 
   .project-card-front {
@@ -133,11 +146,70 @@ const primaryLink = link ?? demo ?? repo;
     padding: 1rem;
     font: inherit;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+    transition: border-color 0.2s, color 0.2s;
+    transform: rotateY(0deg);
+  }
+
+  .project-card-front--has-image {
+    padding: 0;
+    gap: 0;
+  }
+
+  .project-card-thumb {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  .project-card-front-overlay {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    background: linear-gradient(
+      to top,
+      rgba(15, 23, 42, 0.92) 0%,
+      rgba(15, 23, 42, 0.4) 45%,
+      transparent 100%
+    );
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  .project-card-front--has-image .project-card-title {
+    color: var(--color-text);
+    text-align: center;
+  }
+
+  .project-card-front--has-image:hover .project-card-title,
+  .project-card-front--has-image:focus-visible .project-card-title {
+    color: var(--color-accent);
+  }
+
+  .project-card-front--has-image .project-card-hint {
+    color: var(--color-text-muted);
   }
 
   .project-card[data-flipped="true"] .project-card-front {
     pointer-events: none;
+    visibility: hidden;
+  }
+
+  .project-card[data-flipped="false"] .project-card-back {
+    visibility: hidden;
   }
 
   .project-card-front:hover,
@@ -168,10 +240,12 @@ const primaryLink = link ?? demo ?? repo;
   }
 
   .project-card-back {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg) translateZ(1px);
     display: flex;
     flex-direction: column;
     padding: 1.25rem;
+    background: var(--color-bg-card);
+    cursor: pointer;
   }
 
   .project-card[data-flipped="true"] .project-card-back {
@@ -180,36 +254,13 @@ const primaryLink = link ?? demo ?? repo;
 
   .project-card-back[aria-hidden="true"] {
     pointer-events: none;
-  }
-
-  .project-card-back-close {
-    position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  .project-card-back-close:hover,
-  .project-card-back-close:focus-visible {
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-    outline: none;
+    cursor: default;
   }
 
   .project-card-back-title {
     font-size: 1.05rem;
     font-weight: 600;
-    margin: 0 0 0.75rem 2.5rem;
+    margin: 0 0 0.75rem;
     padding-right: 0.5rem;
   }
 
@@ -269,6 +320,9 @@ const primaryLink = link ?? demo ?? repo;
     border-bottom: 1px solid transparent;
     transition: border-color 0.15s;
     align-self: flex-start;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
 
   .project-card-link:hover {
@@ -287,34 +341,47 @@ const primaryLink = link ?? demo ?? repo;
 </style>
 
 <script>
-  const openButtons = document.querySelectorAll<HTMLButtonElement>(
-    "[data-flip-open]"
-  );
-
   const setFlipped = (card: HTMLElement, flipped: boolean) => {
     card.setAttribute("data-flipped", flipped ? "true" : "false");
     const back = card.querySelector<HTMLElement>(".project-card-back");
     const front = card.querySelector<HTMLElement>(".project-card-front");
-    if (back) back.setAttribute("aria-hidden", flipped ? "false" : "true");
+    if (back) {
+      back.setAttribute("aria-hidden", flipped ? "false" : "true");
+      back.setAttribute("tabindex", flipped ? "0" : "-1");
+    }
     if (front) front.setAttribute("aria-hidden", flipped ? "true" : "false");
   };
 
-  openButtons.forEach((btn) => {
+  document.querySelectorAll<HTMLButtonElement>("[data-flip-open]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const card = btn.closest<HTMLElement>(".project-card");
       if (card) setFlipped(card, true);
     });
   });
 
-  const closeButtons = document.querySelectorAll<HTMLButtonElement>(
-    "[data-flip-close]"
-  );
+  document.querySelectorAll<HTMLElement>("[data-flip-close]").forEach((back) => {
+    back.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-no-flip]")) return;
 
-  closeButtons.forEach((btn) => {
-    btn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const card = btn.closest<HTMLElement>(".project-card");
+      const card = back.closest<HTMLElement>(".project-card");
       if (card) setFlipped(card, false);
+    });
+
+    back.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-no-flip]")) return;
+
+      event.preventDefault();
+      const card = back.closest<HTMLElement>(".project-card");
+      if (card) setFlipped(card, false);
+    });
+  });
+
+  document.querySelectorAll<HTMLAnchorElement>("[data-no-flip]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.stopPropagation();
     });
   });
 </script>

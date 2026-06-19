@@ -39,22 +39,6 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  <!-- Projects -->
-  <section class="section" id="projects">
-    <div class="container">
-      <h2 class="section-title">Featured Projects</h2>
-      {projects.length > 0 ? (
-        <div class="projects-grid">
-          {projects.map((project) => (
-            <ProjectCard {...project} />
-          ))}
-        </div>
-      ) : (
-        <p class="projects-empty">Projects coming soon.</p>
-      )}
-    </div>
-  </section>
-
   <!-- Skills -->
   <section class="section" id="skills">
     <div class="container">
@@ -90,6 +74,22 @@ const base = import.meta.env.BASE_URL;
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="section" id="projects">
+    <div class="container">
+      <h2 class="section-title">Featured Projects</h2>
+      {projects.length > 0 ? (
+        <div class="projects-grid">
+          {projects.map((project) => (
+            <ProjectCard {...project} />
+          ))}
+        </div>
+      ) : (
+        <p class="projects-empty">Projects coming soon.</p>
+      )}
     </div>
   </section>
 

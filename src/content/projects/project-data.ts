@@ -21,22 +21,4 @@ export const projects: Project[] = [
     repo: "https://github.com/ianmager/a-wall-of-thoughs",
     demo: "https://a-wall-of-thoughs.vercel.app/",
   },
-  {
-    title: "Project 2",
-    description: "",
-    stack: [],
-    impact: "",
-  },
-  {
-    title: "Project 3",
-    description: "",
-    stack: [],
-    impact: "",
-  },
-  {
-    title: "Project 4",
-    description: "",
-    stack: [],
-    impact: "",
-  },
 ];

@@ -27,7 +27,7 @@ const primaryLink = link ?? demo ?? repo;
     >
       {imageSrc ? (
         <>
-          <img src={imageSrc} alt="" class="project-card-thumb" loading="lazy" />
+          <img src={imageSrc} alt="" class="project-card-thumb" loading="lazy" decoding="async" width="1200" height="684" />
           <span class="project-card-front-overlay">
             <span class="project-card-title">{title}</span>
             <span class="project-card-hint">Click to flip</span>
@@ -129,12 +129,17 @@ const primaryLink = link ?? demo ?? repo;
     inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    border: 2px solid var(--color-border);
+    border-radius: 0;
     background: var(--color-bg-card);
     color: var(--color-text);
     overflow: hidden;
     transform-style: preserve-3d;
+    box-shadow: var(--shadow-hard);
+  }
+
+  .project-card:hover .project-card-face {
+    box-shadow: var(--shadow-hard-lg);
   }
 
   .project-card-front {
@@ -180,8 +185,8 @@ const primaryLink = link ?? demo ?? repo;
     padding: 1rem;
     background: linear-gradient(
       to top,
-      rgba(15, 23, 42, 0.92) 0%,
-      rgba(15, 23, 42, 0.4) 45%,
+      rgba(2, 8, 38, 0.92) 0%,
+      rgba(2, 8, 38, 0.4) 45%,
       transparent 100%
     );
     backface-visibility: hidden;
@@ -220,14 +225,15 @@ const primaryLink = link ?? demo ?? repo;
   }
 
   .project-card-title {
+    font-family: var(--font-pixel);
     font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
 
   .project-card-hint {
+    font-family: var(--font-pixel);
     font-size: 0.7rem;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-text-muted);
     opacity: 0;
@@ -258,8 +264,11 @@ const primaryLink = link ?? demo ?? repo;
   }
 
   .project-card-back-title {
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-family: var(--font-pixel);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-accent-hover);
     margin: 0 0 0.75rem;
     padding-right: 0.5rem;
   }
@@ -280,22 +289,26 @@ const primaryLink = link ?? demo ?? repo;
   }
 
   .project-card-label {
+    font-family: var(--font-pixel);
     font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-text-muted);
+    color: var(--color-accent);
   }
 
   .project-card-text {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     line-height: 1.5;
     color: var(--color-text);
   }
 
   .project-card-impact {
-    color: var(--color-accent);
-    font-weight: 500;
+    color: var(--color-accent-hover);
+  }
+
+  .project-card-back-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-accent-strong) var(--color-bg);
   }
 
   .project-card-placeholder {

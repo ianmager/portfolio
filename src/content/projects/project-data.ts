@@ -17,7 +17,7 @@ export const projects: Project[] = [
     stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "Vercel"],
     impact:
       "Shipped a live full-stack app with Google auth, Postgres + row-level security, and custom placement/styling stored per message.",
-    image: "projects/a-wall-of-thoughts.png",
+    image: "projects/a-wall-of-thoughts.webp",
     repo: "https://github.com/ianmager/a-wall-of-thoughs",
     demo: "https://a-wall-of-thoughs.vercel.app/",
   },

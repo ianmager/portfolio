@@ -9,7 +9,8 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title="Ian Mager">
   <!-- Hero -->
   <section class="hero">
-    <div class="container">
+    <canvas class="hero-dither" id="hero-dither" aria-hidden="true"></canvas>
+    <div class="container hero-content">
       <p class="hero-greeting">Hi, I'm</p>
       <h1 class="hero-name">Ian Mager</h1>
       <h2 class="hero-role">Software Engineer</h2>
@@ -20,21 +21,9 @@ const base = import.meta.env.BASE_URL;
       </p>
       <div class="hero-actions">
         <a href={`${base}#projects`} class="btn btn-primary">Projects</a>
-        <div class="resume-mascot-wrap" id="resume-mascot-wrap">
-          <div class="mascot" aria-hidden="true">
-            <span class="mascot-arm mascot-arm-left"></span>
-            <span class="mascot-arm mascot-arm-right"></span>
-            <span class="mascot-leg mascot-leg-left"></span>
-            <span class="mascot-leg mascot-leg-right"></span>
-            <div class="mascot-body">
-              <span class="mascot-eye mascot-eye-left"></span>
-              <span class="mascot-eye mascot-eye-right"></span>
-            </div>
-          </div>
-          <a href={`${base}resume.pdf`} class="btn btn-outline resume-btn" target="_blank" rel="noopener">
-            Resume
-          </a>
-        </div>
+        <a href={`${base}resume.pdf`} class="btn btn-outline" target="_blank" rel="noopener">
+          Resume
+        </a>
       </div>
     </div>
   </section>
@@ -127,216 +116,143 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
   <script>
-    const wrap = document.getElementById("resume-mascot-wrap");
-    if (wrap) {
-      const NEAR_ZONE_PX = 60;
-      let ticking = false;
-      let pointerX = 0;
-      let pointerY = 0;
+    import { mountHeroDither } from "../scripts/hero-dither";
 
-      const update = () => {
-        const rect = wrap.getBoundingClientRect();
-        const dx = Math.max(rect.left - pointerX, 0, pointerX - rect.right);
-        const dy = Math.max(rect.top - pointerY, 0, pointerY - rect.bottom);
-        const distance = Math.hypot(dx, dy);
-        wrap.classList.toggle("is-happy", distance <= NEAR_ZONE_PX);
-        ticking = false;
-      };
-
-      window.addEventListener("mousemove", (e) => {
-        pointerX = e.clientX;
-        pointerY = e.clientY;
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(update);
-        }
-      }, { passive: true });
-
-      window.addEventListener("mouseleave", () => {
-        wrap.classList.remove("is-happy");
-      });
-    }
+    const heroCanvas = document.getElementById("hero-dither");
+    if (heroCanvas instanceof HTMLCanvasElement) mountHeroDither(heroCanvas);
   </script>
 </BaseLayout>
 
 <style>
   .hero {
-    padding: 6rem 0 4rem;
+    position: relative;
+    overflow: hidden;
+    padding: 7rem 0 7rem;
+    background: var(--color-bg);
+  }
+
+  .hero-dither {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 0 var(--color-bg);
   }
 
   .hero-greeting {
-    font-family: var(--font-mono);
+    font-family: var(--font-pixel);
     color: var(--color-accent);
     font-size: 0.95rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .hero-greeting::before {
+    content: "> ";
   }
 
   .hero-name {
-    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-family: var(--font-pixel);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
     font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 0.25rem;
-    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    color: var(--color-text);
+    text-shadow:
+      4px 4px 0 var(--color-accent-deep),
+      8px 8px 0 var(--color-bg);
   }
 
   .hero-role {
-    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
-    font-weight: 600;
-    color: var(--color-text-muted);
-    margin-bottom: 1.25rem;
-    letter-spacing: -0.02em;
+    font-family: var(--font-pixel);
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    font-weight: 400;
+    color: var(--color-accent-hover);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  .hero-role::after {
+    content: "_";
+    margin-left: 0.15em;
+    animation: cursor-blink 1s steps(1) infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
   }
 
   .hero-blurb {
     max-width: 540px;
-    color: var(--color-text-muted);
-    font-size: 1.05rem;
-    line-height: 1.7;
-    margin-bottom: 2rem;
+    color: var(--color-text);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 2.25rem;
   }
 
   .hero-actions {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .btn {
     display: inline-flex;
     align-items: center;
-    padding: 0.65rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 600;
+    padding: 0.6rem 1.4rem;
+    border-radius: 0;
+    font-family: var(--font-pixel);
     font-size: 0.9rem;
-    transition: all 0.2s;
+    text-transform: uppercase;
+    text-shadow: none;
+    box-shadow: var(--shadow-hard);
+    transition: transform 0.1s steps(2), box-shadow 0.1s steps(2), background 0.1s steps(2);
+  }
+
+  .btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--color-accent-deep);
+  }
+
+  .btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--color-accent-deep);
   }
 
   .btn-primary {
-    background: var(--color-accent);
-    color: var(--color-bg);
+    background: var(--color-accent-strong);
+    border: 2px solid var(--color-accent-strong);
+    color: #fff;
   }
 
   .btn-primary:hover {
-    background: var(--color-accent-hover);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     color: var(--color-bg);
   }
 
   .btn-outline {
-    border: 1px solid var(--color-accent);
+    border: 2px solid var(--color-accent);
+    background: var(--color-bg);
     color: var(--color-accent);
   }
 
   .btn-outline:hover {
-    background: rgba(56, 189, 248, 0.1);
-  }
-
-  .resume-mascot-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .mascot {
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 4px);
-    width: 28px;
-    height: 34px;
-    transform: translateX(-50%);
-    pointer-events: none;
-  }
-
-  .mascot-body {
-    position: absolute;
-    inset: 4px 4px 6px 4px;
-    background: var(--color-accent);
-    border-radius: 50% / 55%;
-    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.35);
-    z-index: 2;
-  }
-
-  .mascot-eye {
-    position: absolute;
-    top: 45%;
-    width: 3px;
-    height: 3px;
-    background: var(--color-bg);
-    border-radius: 50%;
-    transition: height 0.2s ease, border-radius 0.2s ease, top 0.2s ease;
-  }
-
-  .mascot-eye-left {
-    left: 28%;
-  }
-
-  .mascot-eye-right {
-    right: 28%;
-  }
-
-  .mascot-arm,
-  .mascot-leg {
-    position: absolute;
-    background: var(--color-accent);
-    border-radius: 4px;
-    z-index: 1;
-  }
-
-  .mascot-arm {
-    top: 44%;
-    width: 3px;
-    height: 8px;
-    transform-origin: top center;
-  }
-
-  .mascot-arm-left {
-    left: 2px;
-    transform: rotate(20deg);
-  }
-
-  .mascot-arm-right {
-    right: 2px;
-    transform: rotate(-20deg);
-  }
-
-  .mascot-leg {
-    bottom: 0;
-    width: 3px;
-    height: 7px;
-    transform-origin: top center;
-  }
-
-  .mascot-leg-left {
-    left: 9px;
-  }
-
-  .mascot-leg-right {
-    right: 9px;
-  }
-
-  .resume-mascot-wrap.is-happy .mascot-arm-right {
-    animation: mascot-arm-wave 0.6s ease-in-out infinite;
-  }
-
-  .resume-mascot-wrap.is-happy .mascot-leg-left {
-    transform: translateY(-3px) rotate(20deg);
-  }
-
-  .resume-mascot-wrap.is-happy .mascot-eye {
-    height: 1.5px;
-    border-radius: 2px;
-    top: 48%;
-  }
-
-  @keyframes mascot-arm-wave {
-    0%, 100% {
-      transform: rotate(-140deg);
-    }
-    50% {
-      transform: rotate(-165deg);
-    }
+    background:
+      conic-gradient(var(--color-accent-deep) 25%, transparent 0 50%, var(--color-accent-deep) 0 75%, transparent 0) 0 0 / 4px 4px,
+      var(--color-bg);
+    color: var(--color-accent-hover);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .resume-mascot-wrap.is-happy .mascot-arm-right {
+    .hero-role::after {
       animation: none;
     }
   }
@@ -363,13 +279,20 @@ const base = import.meta.env.BASE_URL;
     }
   }
 
+  .skill-group {
+    padding: 1.1rem 1.1rem 1.25rem;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    box-shadow: var(--shadow-hard);
+  }
+
   .skill-group-title {
-    font-size: 0.85rem;
+    font-family: var(--font-pixel);
+    font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-muted);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
+    color: var(--color-accent);
+    margin-bottom: 0.85rem;
+    font-weight: 400;
   }
 
   .skill-tags {
@@ -402,16 +325,20 @@ const base = import.meta.env.BASE_URL;
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    border: 2px solid var(--color-border);
+    background: var(--color-bg);
     color: var(--color-text-muted);
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: all 0.2s;
+    font-family: var(--font-pixel);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-hard);
+    transition: transform 0.1s steps(2), box-shadow 0.1s steps(2), border-color 0.1s steps(2);
   }
 
   .contact-link:hover {
     border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-accent-hover);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--color-accent-deep);
   }
 </style>
